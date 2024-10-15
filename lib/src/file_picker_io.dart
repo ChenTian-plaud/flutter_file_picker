@@ -29,7 +29,6 @@ class FilePickerIO extends FilePicker {
     bool? allowCompression = true,
     bool allowMultiple = false,
     bool? withData = false,
-    int compressionQuality = 30,
     bool? withReadStream = false,
     bool lockParentWindow = false,
     bool readSequential = false,
@@ -42,7 +41,6 @@ class FilePickerIO extends FilePicker {
         onFileLoading,
         withData,
         withReadStream,
-        compressionQuality,
       );
 
   @override
@@ -74,16 +72,11 @@ class FilePickerIO extends FilePicker {
     Function(FilePickerStatus)? onFileLoading,
     bool? withData,
     bool? withReadStream,
-    int? compressionQuality,
   ) async {
     final String type = fileType.name;
     if (type != 'custom' && (allowedExtensions?.isNotEmpty ?? false)) {
-      throw ArgumentError.value(
-        allowedExtensions,
-        'allowedExtensions',
-        'Custom extension filters are only allowed with FileType.custom. '
-            'Remove the extension filter or change the FileType to FileType.custom.',
-      );
+      throw Exception(
+          'You are setting a type [$fileType]. Custom extension filters are only allowed with FileType.custom, please change it or remove filters.');
     }
     try {
       _eventSubscription?.cancel();
@@ -101,7 +94,6 @@ class FilePickerIO extends FilePicker {
         'allowedExtensions': allowedExtensions,
         'allowCompression': allowCompression,
         'withData': withData,
-        'compressionQuality': compressionQuality,
       });
 
       if (result == null) {
@@ -130,34 +122,5 @@ class FilePickerIO extends FilePicker {
           '[$_tag] Unsupported operation. Method not found. The exception thrown was: $e');
       rethrow;
     }
-  }
-
-  @override
-  Future<String?> saveFile(
-      {String? dialogTitle,
-      String? fileName,
-      String? initialDirectory,
-      FileType type = FileType.any,
-      List<String>? allowedExtensions,
-      Uint8List? bytes,
-      bool lockParentWindow = false}) {
-    if (Platform.isIOS || Platform.isAndroid) {
-      return _channel.invokeMethod("save", {
-        "fileName": fileName,
-        "fileType": type.name,
-        "initialDirectory": initialDirectory,
-        "allowedExtensions": allowedExtensions,
-        "bytes": bytes,
-      });
-    }
-    return super.saveFile(
-      dialogTitle: dialogTitle,
-      fileName: fileName,
-      initialDirectory: initialDirectory,
-      type: type,
-      allowedExtensions: allowedExtensions,
-      bytes: bytes,
-      lockParentWindow: lockParentWindow,
-    );
   }
 }

@@ -27,7 +27,6 @@ class FilePickerWindows extends FilePicker {
     bool withReadStream = false,
     bool lockParentWindow = false,
     bool readSequential = false,
-    int compressionQuality = 30,
   }) async {
     final port = ReceivePort();
     await Isolate.spawn(
@@ -94,9 +93,7 @@ class FilePickerWindows extends FilePicker {
     String? initialDirectory,
   }) {
     int hr = CoInitializeEx(
-      nullptr,
-      COINIT.COINIT_APARTMENTTHREADED | COINIT.COINIT_DISABLE_OLE1DDE,
-    );
+        nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
     if (!SUCCEEDED(hr)) throw WindowsException(hr);
 
@@ -118,25 +115,26 @@ class FilePickerWindows extends FilePicker {
     if (!SUCCEEDED(hr)) throw WindowsException(hr);
     free(title);
 
-    if (initialDirectory != null) {
-      final folder = TEXT(initialDirectory);
-      final riid = convertToIID(IID_IShellItem);
-      final ppv = calloc<Pointer>();
-      hr = SHCreateItemFromParsingName(folder, nullptr, riid, ppv);
-      final item = IShellItem(ppv.cast());
-      free(riid);
-      free(folder);
-      if (!SUCCEEDED(hr)) throw WindowsException(hr);
-      hr = fileDialog.setFolder(item.ptr.cast<Pointer<COMObject>>().value);
-      if (!SUCCEEDED(hr)) throw WindowsException(hr);
-    }
+    // TODO: figure out how to set the initial directory via SetDefaultFolder / SetFolder
+    // if (initialDirectory != null) {
+    //   final folder = TEXT(initialDirectory);
+    //   final riid = calloc<COMObject>();
+    //   final item = IShellItem(riid);
+    //   final location = item.ptr;
+    //   SHCreateItemFromParsingName(folder, nullptr, riid.cast(), item.ptr.cast());
+    //   hr = fileDialog.AddPlace(item.ptr, FDAP.FDAP_TOP);
+    //   if (!SUCCEEDED(hr)) throw WindowsException(hr);
+    //   hr = fileDialog.SetFolder(location);
+    //   if (!SUCCEEDED(hr)) throw WindowsException(hr);
+    //   free(folder);
+    // }
 
     final hwndOwner = lockParentWindow ? GetForegroundWindow() : NULL;
     hr = fileDialog.show(hwndOwner);
     if (!SUCCEEDED(hr)) {
       CoUninitialize();
 
-      if (hr == HRESULT_FROM_WIN32(WIN32_ERROR.ERROR_CANCELLED)) {
+      if (hr == HRESULT_FROM_WIN32(ERROR_CANCELLED)) {
         return Future.value(null);
       }
       throw WindowsException(hr);
@@ -168,7 +166,6 @@ class FilePickerWindows extends FilePicker {
     String? initialDirectory,
     FileType type = FileType.any,
     List<String>? allowedExtensions,
-    Uint8List? bytes,
     bool lockParentWindow = false,
   }) async {
     final port = ReceivePort();
@@ -265,7 +262,7 @@ class FilePickerWindows extends FilePicker {
     bool lastCharWasNull = false;
     // ignore: literal_only_boolean_expressions
     while (true) {
-      final char = openFileNameW.lpstrFile.cast<Uint16>()[i];
+      final char = openFileNameW.lpstrFile.cast<Uint16>().elementAt(i).value;
       final currentCharIsNull = char == 0;
       if (currentCharIsNull && lastCharWasNull) {
         break;
