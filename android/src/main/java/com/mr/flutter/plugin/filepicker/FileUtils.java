@@ -294,6 +294,21 @@ public class FileUtils {
 
         final File file = new File(path);
 
+        // 尝试获取的文件的创建时间
+        long fileTime = 0L;
+        try {
+            Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+            if (cursor != null) {
+                int columnIndex = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_LAST_MODIFIED);
+                if (columnIndex != -1 && cursor.moveToFirst()) {
+                    fileTime = cursor.getLong(columnIndex);
+                }
+                cursor.close();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting SAF file time", e);
+        }
+
         if(!file.exists()) {
             file.getParentFile().mkdirs();
             try {
@@ -313,6 +328,15 @@ public class FileUtils {
                 } finally {
                     fos.getFD().sync();
                 }
+
+                // 设置新文件的最后修改时间
+                if (fileTime != 0 && file.exists()) {
+                    boolean success = file.setLastModified(fileTime);
+                    if (!success) {
+                        Log.w(TAG, "Failed to set last modified time for file: " + file.getAbsolutePath());
+                    }
+                }
+                
             } catch (final Exception e) {
                 try {
                     fos.close();
