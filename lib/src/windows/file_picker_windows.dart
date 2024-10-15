@@ -11,11 +11,9 @@ import 'package:file_picker/src/windows/file_picker_windows_ffi_types.dart';
 import 'package:path/path.dart';
 import 'package:win32/win32.dart';
 
-class FilePickerWindows extends FilePicker {
-  static void registerWith() {
-    FilePicker.platform = FilePickerWindows();
-  }
+FilePicker filePickerWithFFI() => FilePickerWindows();
 
+class FilePickerWindows extends FilePicker {
   @override
   Future<FilePickerResult?> pickFiles({
     String? dialogTitle,

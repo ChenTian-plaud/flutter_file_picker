@@ -16,10 +16,6 @@ const EventChannel _eventChannel =
 
 /// An implementation of [FilePicker] that uses method channels.
 class FilePickerIO extends FilePicker {
-  static void registerWith() {
-    FilePicker.platform = FilePickerIO();
-  }
-
   static const String _tag = 'MethodChannelFilePicker';
   static StreamSubscription? _eventSubscription;
 

@@ -1,5 +1,4 @@
 @TestOn('windows')
-library;
 
 import 'dart:ffi';
 

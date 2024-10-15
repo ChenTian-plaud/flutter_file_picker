@@ -12,12 +12,14 @@ class FilePickerWeb extends FilePicker {
 
   final int _readStreamChunkSize = 1000 * 1000; // 1 MB
 
+  static final FilePickerWeb platform = FilePickerWeb._();
+
   FilePickerWeb._() {
     _target = _ensureInitialized(_kFilePickerInputsDomId);
   }
 
   static void registerWith(Registrar registrar) {
-    FilePicker.platform = FilePickerWeb._();
+    FilePicker.platform = platform;
   }
 
   /// Initializes a DOM container where we can host input elements.
@@ -216,15 +218,16 @@ class FilePickerWeb extends FilePicker {
       if (readerResult == null) {
         continue;
       }
-
+      // TODO: use `isA<JSArrayBuffer>()` when switching to Dart 3.4
       // Handle the ArrayBuffer type. This maps to a `ByteBuffer` in Dart.
-      if (readerResult.isA<JSArrayBuffer>()) {
+      if (readerResult.instanceOfString('ArrayBuffer')) {
         yield (readerResult as JSArrayBuffer).toDart.asUint8List();
         start += _readStreamChunkSize;
         continue;
       }
-
-      if (readerResult.isA<JSArray>()) {
+      // TODO: use `isA<JSArray>()` when switching to Dart 3.4
+      // Handle the Array type.
+      if (readerResult.instanceOfString('Array')) {
         // Assume this is a List<int>.
         yield (readerResult as JSArray).toDart.cast<int>();
         start += _readStreamChunkSize;

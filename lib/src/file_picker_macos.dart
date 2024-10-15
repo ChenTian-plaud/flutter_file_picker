@@ -4,10 +4,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:file_picker/src/utils.dart';
 
 class FilePickerMacOS extends FilePicker {
-  static void registerWith() {
-    FilePicker.platform = FilePickerMacOS();
-  }
-
   @override
   Future<FilePickerResult?> pickFiles({
     String? dialogTitle,
@@ -135,7 +131,7 @@ class FilePickerMacOS extends FilePicker {
       case FileType.media:
         return '"avi", "flv", "m4v", "mkv", "mov", "mp4", "mpeg", "webm", "wmv", "bmp", "gif", "jpeg", "jpg", "png"';
       case FileType.video:
-        return '"avi", "flv", "mkv", "mov", "mp4", "m4v", "mpeg", "webm", "wmv"';
+        return '"avi", "flv", "mkv", "mov", "mp4", "mpeg", "webm", "wmv"';
       default:
         throw Exception('unknown file type');
     }

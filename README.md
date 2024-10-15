@@ -90,7 +90,6 @@ if (result != null) {
 #### Multiple files with extension filter
 ```dart
 FilePickerResult? result = await FilePicker.platform.pickFiles(
-  allowMultiple: true,
   type: FileType.custom,
   allowedExtensions: ['jpg', 'pdf', 'doc'],
 );
